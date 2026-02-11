@@ -8,6 +8,7 @@ let cameraY = 0; // Camera position for scrolling
 let levelsData = null; // Loaded from levels.json
 let currentLevel = 1; // Current level (1 or 2)
 let levelConfig = null; // Current level configuration
+let levelTransitionTimer = 0; // Timer for level transition message
 
 // Player character - retro arcade blob
 let blob = {
@@ -254,6 +255,13 @@ function draw() {
         depth++;
         blob.colorDepth = depth;
         blob.anxietyTimer = 120;
+
+        // Check if we should transition to level 2
+        if (depth === 50 && currentLevel === 1) {
+          currentLevel = 2;
+          levelTransitionTimer = 180; // Show message for 3 seconds
+          loadLevel();
+        }
       }
       break;
     }
@@ -516,6 +524,18 @@ function draw() {
     textSize(12);
     text("TIME: " + timeRemaining + "s", width - 10, 60);
     textAlign(LEFT);
+  }
+
+  // Level transition message
+  if (levelTransitionTimer > 0) {
+    levelTransitionTimer--;
+    fill(255, 200, 0);
+    textAlign(CENTER, CENTER);
+    textSize(24);
+    text("LEVEL 2: " + levelConfig.name, width / 2, height / 2 - 30);
+    fill(200, 200, 200);
+    textSize(14);
+    text("Things are getting harder...", width / 2, height / 2 + 20);
   }
 }
 
