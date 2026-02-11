@@ -5,6 +5,9 @@ let gameOver = false;
 let gameOverReason = "";
 let gameStarted = false;
 let cameraY = 0; // Camera position for scrolling
+let levelsData = null; // Loaded from levels.json
+let currentLevel = 1; // Current level (1 or 2)
+let levelConfig = null; // Current level configuration
 
 // Player character - retro arcade blob
 let blob = {
@@ -38,6 +41,10 @@ let monsters = [];
 // List of solid platforms
 let platforms = [];
 
+function preload() {
+  levelsData = loadJSON("levels.json");
+}
+
 function setup() {
   createCanvas(640, 360);
 
@@ -47,14 +54,20 @@ function setup() {
   textFont("monospace");
   textSize(12);
 
-  generateLevel();
+  // Load level 1 by default
+  currentLevel = 1;
+  loadLevel();
   // Start blob on the first platform
   blob.y = platforms[0].y - blob.h;
   blob.vy = 0;
   blob.onPlatform = true;
 }
 
-function generateLevel() {
+function loadLevel() {
+  // Get current level data from JSON
+  levelConfig = levelsData.levels[currentLevel - 1];
+
+  // Reset game state
   platforms = [];
   collectibleBlobs = [];
   spikes = [];
@@ -62,60 +75,63 @@ function generateLevel() {
 
   let yPos = 80; // Start first platform near top so blob can stand on it
 
-  // Generate initial set of platforms with consistent spacing
-  for (let i = 0; i < 25; i++) {
-    let platformWidth = random(70, 130);
-    let platformX = random(20, width - platformWidth - 20); // Keep centered
+  // Generate initial set of platforms
+  // Calculate how many platforms to create based on the spawn rates in the level
+  let platformCount = 25; // Fixed number of initial platforms
 
-    platforms.push({
-      x: platformX,
-      y: yPos,
-      w: platformWidth,
-      h: 10,
-      visited: false,
-    });
+  for (let i = 0; i < platformCount; i++) {
+    // Determine if we place a platform based on density
+    if (random() < levelConfig.platformDensity) {
+      let platformWidth = random(70, 130);
+      let platformX = random(20, width - platformWidth - 20);
 
-    // Random hazards (spikes or monsters) - lower frequency for reachability
-    // Don't spawn spikes in first 3 depth levels
-    if (depth >= 3) {
-      if (random() < 0.18) {
+      platforms.push({
+        x: platformX,
+        y: yPos,
+        w: platformWidth,
+        h: 10,
+        visited: false,
+      });
+
+      // Spawn spikes based on spawn rate
+      if (random() < levelConfig.spikeSpawnRate) {
         spikes.push({
           x: platformX + random(10, platformWidth - 10),
           y: yPos - 12,
           size: 5,
         });
       }
-    }
 
-    // Monsters spawn from beginning
-    if (random() < 0.12) {
-      monsters.push({
-        x: platformX + platformWidth / 2,
-        y: yPos - 14,
-        w: 12,
-        h: 12,
-        vx: random([-1, 1]),
-        platformY: yPos,
-        platformX: platformX,
-        platformW: platformWidth,
-      });
-    }
+      // Spawn monsters based on spawn rate
+      if (random() < levelConfig.monsterSpawnRate) {
+        monsters.push({
+          x: platformX + platformWidth / 2,
+          y: yPos - 14,
+          w: 12,
+          h: 12,
+          vx: random([-1, 1]),
+          platformY: yPos,
+          platformX: platformX,
+          platformW: platformWidth,
+        });
+      }
 
-    // Add collectible blob
-    if (random() < 0.3) {
-      collectibleBlobs.push({
-        x: platformX + random(10, platformWidth - 10),
-        y: yPos - 12,
-        vx: 0,
-        vy: 0,
-        w: 8,
-        h: 8,
-        isMischief: random() < 0.2,
-        falling: false,
-      });
-    }
+      // Spawn collectibles based on spawn rate
+      if (random() < levelConfig.collectibleSpawnRate) {
+        collectibleBlobs.push({
+          x: platformX + random(10, platformWidth - 10),
+          y: yPos - 12,
+          vx: 0,
+          vy: 0,
+          w: 8,
+          h: 8,
+          isMischief: random() < 0.2,
+          falling: false,
+        });
+      }
 
-    yPos += random(55, 65); // Consistent spacing for jumpable distances
+      yPos += random(55, 65); // Consistent spacing for jumpable distances
+    }
   }
 }
 
@@ -202,10 +218,12 @@ function draw() {
     return;
   }
 
-  // --- Player input ---
+  // --- Player input (use level config movement speed) ---
   blob.vx = 0;
-  if (keyIsDown(65) || keyIsDown(LEFT_ARROW)) blob.vx = -blob.speed;
-  if (keyIsDown(68) || keyIsDown(RIGHT_ARROW)) blob.vx = blob.speed;
+  if (keyIsDown(65) || keyIsDown(LEFT_ARROW))
+    blob.vx = -levelConfig.blobMovementSpeed;
+  if (keyIsDown(68) || keyIsDown(RIGHT_ARROW))
+    blob.vx = levelConfig.blobMovementSpeed;
 
   blob.x += blob.vx;
   blob.x = constrain(blob.x, 0, width - blob.w);
@@ -266,20 +284,17 @@ function draw() {
       visited: false,
     });
 
-    // Add hazards to new platform
-    // Don't spawn spikes in first 3 depth levels
-    if (depth >= 3) {
-      if (random() < 0.18) {
-        spikes.push({
-          x: platformX + random(10, platformWidth - 10),
-          y: newY - 12,
-          size: 5,
-        });
-      }
+    // Add hazards to new platform using level config spawn rates
+    if (random() < levelConfig.spikeSpawnRate) {
+      spikes.push({
+        x: platformX + random(10, platformWidth - 10),
+        y: newY - 12,
+        size: 5,
+      });
     }
 
-    // Monsters spawn from beginning
-    if (random() < 0.12) {
+    // Monsters spawn based on level config
+    if (random() < levelConfig.monsterSpawnRate) {
       monsters.push({
         x: platformX + platformWidth / 2,
         y: newY - 14,
@@ -292,7 +307,8 @@ function draw() {
       });
     }
 
-    if (random() < 0.3) {
+    // Collectibles spawn based on level config
+    if (random() < levelConfig.collectibleSpawnRate) {
       collectibleBlobs.push({
         x: platformX + random(10, platformWidth - 10),
         y: newY - 12,
@@ -365,18 +381,18 @@ function draw() {
     }
   }
 
-  // --- Update monsters ---
+  // --- Update monsters (use level config platform speed) ---
   for (let i = monsters.length - 1; i >= 0; i--) {
     const m = monsters[i];
-    
-    // Simple side-to-side movement
-    m.x += m.vx * 0.8;
-    
+
+    // Side-to-side movement uses platform speed from level config
+    m.x += m.vx * (levelConfig.platformSpeed * 0.4);
+
     // Turn around at platform edges
     if (m.x < m.platformX + 10 || m.x > m.platformX + m.platformW - 10) {
       m.vx *= -1;
     }
-    
+
     // Check collision with blob
     if (
       blob.x < m.x + m.w &&
@@ -393,7 +409,7 @@ function draw() {
         gameOverReason = "Hit by monster!";
       }
     }
-    
+
     // Remove if too far above
     if (m.platformY < cameraY - 200) {
       monsters.splice(i, 1);
@@ -594,6 +610,7 @@ function keyPressed() {
     if (gameOver) {
       score = 0;
       depth = 0;
+      currentLevel = 1; // Reset to level 1
       gameOver = false;
       gameStarted = false;
       gameOverReason = "";
