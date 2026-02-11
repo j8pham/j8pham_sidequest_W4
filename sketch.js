@@ -1,12 +1,13 @@
 // Game state
 let score = 0;
 let depth = 0; // How far down in the dungeon
+let floor = 0; // Current floor (1-based, increases every 25 depth)
 let gameOver = false;
 let gameOverReason = "";
 let gameStarted = false;
 let cameraY = 0; // Camera position for scrolling
 let levelsData = null; // Loaded from levels.json
-let currentLevel = 1; // Current level (1 or 2)
+let currentLevel = 1; // Current level (1, 2, 3, or 4)
 let levelConfig = null; // Current level configuration
 let levelTransitionTimer = 0; // Timer for level transition message
 
@@ -214,7 +215,7 @@ function draw() {
     textSize(14);
     fill(200);
     text("Score: " + score, width / 2, height / 2);
-    text("Depth: " + depth, width / 2, height / 2 + 20);
+    text("Floor: " + floor, width / 2, height / 2 + 20);
     text("Press R to restart", width / 2, height / 2 + 50);
     return;
   }
@@ -256,11 +257,24 @@ function draw() {
         blob.colorDepth = depth;
         blob.anxietyTimer = 120;
 
-        // Check if we should transition to level 2
-        if (depth === 50 && currentLevel === 1) {
-          currentLevel = 2;
-          levelTransitionTimer = 180; // Show message for 3 seconds
-          loadLevel();
+        // Calculate current floor (every 25 depth = 1 floor)
+        let newFloor = Math.floor(depth / 25) + 1;
+        if (newFloor !== floor) {
+          floor = newFloor;
+          // Trigger level changes at specific floors
+          if (floor === 2 && currentLevel === 1) {
+            currentLevel = 2;
+            levelTransitionTimer = 180;
+            loadLevel();
+          } else if (floor === 3 && currentLevel === 2) {
+            currentLevel = 3;
+            levelTransitionTimer = 180;
+            loadLevel();
+          } else if (floor === 4 && currentLevel === 3) {
+            currentLevel = 4;
+            levelTransitionTimer = 180;
+            loadLevel();
+          }
         }
       }
       break;
@@ -501,7 +515,7 @@ function draw() {
   textAlign(LEFT);
   textSize(12);
   text("SCORE: " + score, 10, 20);
-  text("DEPTH: " + depth, 10, 35);
+  text("FLOOR: " + floor, 10, 35);
   if (blob.excitedTimer > 0) {
     fill(255, 255, 50);
     text("^ JUMP! ^", 10, 50);
@@ -630,6 +644,7 @@ function keyPressed() {
     if (gameOver) {
       score = 0;
       depth = 0;
+      floor = 0;
       currentLevel = 1; // Reset to level 1
       gameOver = false;
       gameStarted = false;

@@ -35,6 +35,42 @@
         "collectibles": "#F39C12",
         "blob": "#E8DAEF"
       }
+    },
+    {
+      "id": 3,
+      "name": "Level 3: Inferno",
+      "platformDensity": 0.3,
+      "spikeSpawnRate": 0.5,
+      "monsterSpawnRate": 0.4,
+      "collectibleSpawnRate": 0.08,
+      "platformSpeed": 6,
+      "blobMovementSpeed": 6,
+      "colorTheme": {
+        "background": "#331100",
+        "platforms": "#FF4500",
+        "spikes": "#FF0000",
+        "monsters": "#FF6347",
+        "collectibles": "#FFD700",
+        "blob": "#FFFF00"
+      }
+    },
+    {
+      "id": 4,
+      "name": "Level 4: The Abyss",
+      "platformDensity": 0.25,
+      "spikeSpawnRate": 0.65,
+      "monsterSpawnRate": 0.55,
+      "collectibleSpawnRate": 0.05,
+      "platformSpeed": 8,
+      "blobMovementSpeed": 7,
+      "colorTheme": {
+        "background": "#0A0A0A",
+        "platforms": "#1A1A2E",
+        "spikes": "#C70039",
+        "monsters": "#8B00FF",
+        "collectibles": "#00FF00",
+        "blob": "#00FFFF"
+      }
     }
   ]
 }
