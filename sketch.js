@@ -58,103 +58,91 @@ function setup() {
 
   // Load level 1 by default
   currentLevel = 1;
-  loadLevel();
+  loadLevel(true);
   // Start blob on the first platform
   blob.y = platforms[0].y - blob.h;
   blob.vy = 0;
   blob.onPlatform = true;
 }
 
-function loadLevel() {
+function loadLevel(isInit) {
   // Get current level data from JSON, clamping to last level if out of bounds
   let levelIndex = min(currentLevel - 1, levelsData.levels.length - 1);
   levelConfig = levelsData.levels[levelIndex];
 
-  // Reset game state
-  platforms = [];
-  collectibleBlobs = [];
-  spikes = [];
-  monsters = [];
+  // If this is the initial load (setup), generate from scratch
+  // If it's a mid-game level transition, keep existing platforms and just update the config
+  if (isInit) {
+    platforms = [];
+    collectibleBlobs = [];
+    spikes = [];
+    monsters = [];
 
-  let yPos = 80; // Start first platform near top so blob can stand on it
+    let yPos = 80;
+    let platformCount = 25;
 
-  // Generate initial set of platforms
-  // Calculate how many platforms to create based on the spawn rates in the level
-  let platformCount = 25; // Fixed number of initial platforms
+    for (let i = 0; i < platformCount; i++) {
+      if (random() < levelConfig.platformDensity) {
+        let platformWidth = random(70, 130);
+        let platformX = random(20, width - platformWidth - 20);
 
-  for (let i = 0; i < platformCount; i++) {
-    // Determine if we place a platform based on density
-    if (random() < levelConfig.platformDensity) {
-      let platformWidth = random(70, 130);
-      let platformX = random(20, width - platformWidth - 20);
-
-      platforms.push({
-        x: platformX,
-        y: yPos,
-        w: platformWidth,
-        h: 10,
-        visited: false,
-      });
-
-      // Spawn spikes based on spawn rate
-      if (random() < levelConfig.spikeSpawnRate) {
-        spikes.push({
-          x: platformX + random(10, platformWidth - 10),
-          y: yPos - 12,
-          size: 5,
+        platforms.push({
+          x: platformX,
+          y: yPos,
+          w: platformWidth,
+          h: 10,
+          visited: false,
         });
-      }
 
-      // Spawn monsters based on spawn rate
-      if (random() < levelConfig.monsterSpawnRate) {
-        monsters.push({
-          x: platformX + platformWidth / 2,
-          y: yPos - 14,
-          w: 12,
-          h: 12,
-          vx: random([-1, 1]),
-          platformY: yPos,
-          platformX: platformX,
-          platformW: platformWidth,
-        });
-      }
+        if (random() < levelConfig.spikeSpawnRate) {
+          spikes.push({
+            x: platformX + random(10, platformWidth - 10),
+            y: yPos - 12,
+            size: 5,
+          });
+        }
 
-      // Spawn collectibles based on spawn rate
-      if (random() < levelConfig.collectibleSpawnRate) {
-        collectibleBlobs.push({
-          x: platformX + random(10, platformWidth - 10),
-          y: yPos - 12,
-          vx: 0,
-          vy: 0,
-          w: 8,
-          h: 8,
-          isMischief: random() < 0.2,
-          falling: false,
-        });
-      }
+        if (random() < levelConfig.monsterSpawnRate) {
+          monsters.push({
+            x: platformX + platformWidth / 2,
+            y: yPos - 14,
+            w: 12,
+            h: 12,
+            vx: random([-1, 1]),
+            platformY: yPos,
+            platformX: platformX,
+            platformW: platformWidth,
+          });
+        }
 
-      yPos += random(55, 65); // Consistent spacing for jumpable distances
+        if (random() < levelConfig.collectibleSpawnRate) {
+          collectibleBlobs.push({
+            x: platformX + random(10, platformWidth - 10),
+            y: yPos - 12,
+            vx: 0,
+            vy: 0,
+            w: 8,
+            h: 8,
+            isMischief: random() < 0.2,
+            falling: false,
+          });
+        }
+
+        yPos += random(55, 65);
+      }
     }
   }
+  // Mid-game transition: levelConfig is updated, new platforms generated
+  // in draw() will use the new spawn rates, speeds, and colors automatically.
+  // No need to wipe existing platforms - the game continues seamlessly.
 }
 
 function draw() {
-  // Retro arcade background - changes with depth and mischief mode
+  // Background changes with level theme and mischief mode
   if (blob.hasMischief) {
-    // Mischief mode - purple/magenta background
     background(60, 10, 50);
-  } else if (depth >= 30) {
-    // Deep dungeon - dark red
-    background(40, 10, 15);
-  } else if (depth >= 20) {
-    // Deeper dungeon - dark purple
-    background(25, 10, 35);
-  } else if (depth >= 10) {
-    // Deeper - darker blue
-    background(10, 10, 50);
   } else {
-    // Normal dungeon start
-    background(10, 15, 40);
+    background(levelConfig.colorTheme.background);
   }
 
   // Start screen
@@ -164,7 +152,7 @@ function draw() {
     textSize(32);
     text("DUNGEON DROP", width / 2, height / 2 - 100);
 
-    fill(200);
+    fill(255);
     textSize(16);
     text("Press SPACE to start", width / 2, height / 2 - 30);
 
@@ -176,25 +164,25 @@ function draw() {
     // Draw spike icon
     fill(255, 100, 100);
     triangle(15, height - 76, 25, height - 76, 20, height - 86);
-    fill(200, 200, 200);
+    fill(255);
     text("Spikes", 28, height - 81);
 
     // Draw monster icon
     fill(200, 50, 100);
     rect(15, height - 65, 10, 10);
-    fill(200, 200, 200);
+    fill(255);
     text("Monsters", 28, height - 60);
 
     // Draw golden blob
     fill(255, 255, 50);
     rect(15, height - 45, 8, 8);
-    fill(200, 200, 200);
+    fill(255);
     text("Golden +10", 26, height - 40);
 
     // Draw mischief blob (brighter magenta)
     fill(255, 100, 200);
     rect(15, height - 25, 8, 8);
-    fill(200, 200, 200);
+    fill(255);
     text("Dark +50!", 26, height - 20);
 
     // Controls in bottom right
@@ -214,9 +202,10 @@ function draw() {
     textSize(24);
     text("GAME OVER", width / 2, height / 2 - 40);
     textSize(14);
-    fill(200);
+    fill(255);
     text("Score: " + score, width / 2, height / 2);
-    text("Floor: " + floor, width / 2, height / 2 + 20);
+    let finalFloorPosition = (depth % 25) + 1;
+    text("Level: " + currentLevel + " | Floor: " + finalFloorPosition + "/25", width / 2, height / 2 + 20);
     text("Press R to restart", width / 2, height / 2 + 50);
     return;
   }
@@ -266,15 +255,15 @@ function draw() {
           if (floor === 2 && currentLevel === 1) {
             currentLevel = 2;
             levelTransitionTimer = 180;
-            loadLevel();
+            loadLevel(false);
           } else if (floor === 3 && currentLevel === 2) {
             currentLevel = 3;
             levelTransitionTimer = 180;
-            loadLevel();
+            loadLevel(false);
           } else if (floor === 4 && currentLevel === 3) {
             currentLevel = 4;
             levelTransitionTimer = 180;
-            loadLevel();
+            loadLevel(false);
           }
         }
       }
@@ -457,16 +446,17 @@ function draw() {
   push();
   translate(0, -cameraY);
 
-  fill(50, 200, 100);
+  fill(levelConfig.colorTheme.platforms);
   for (const p of platforms) {
     rect(p.x, p.y, p.w, p.h);
-    fill(100, 255, 150);
+    // Highlight top edge
+    fill(255, 255, 255, 60);
     rect(p.x, p.y, p.w, 2);
-    fill(50, 200, 100);
+    fill(levelConfig.colorTheme.platforms);
   }
 
   // --- Draw spikes ---
-  fill(255, 100, 100);
+  fill(levelConfig.colorTheme.spikes);
   for (const s of spikes) {
     triangle(
       s.x - s.size,
@@ -479,7 +469,7 @@ function draw() {
   }
 
   // --- Draw monsters ---
-  fill(200, 50, 100);
+  fill(levelConfig.colorTheme.monsters);
   for (const m of monsters) {
     rect(m.x - m.w / 2, m.y - m.h / 2, m.w, m.h);
     // Eyes
@@ -496,7 +486,7 @@ function draw() {
     if (c.isMischief) {
       fill(255, 100, 200);
     } else {
-      fill(255, 255, 50);
+      fill(levelConfig.colorTheme.collectibles);
     }
     rect(c.x - c.w / 2, c.y - c.h / 2, c.w, c.h);
   }
@@ -516,7 +506,9 @@ function draw() {
   textAlign(LEFT);
   textSize(12);
   text("SCORE: " + score, 10, 20);
-  text("FLOOR: " + floor, 10, 35);
+  // Calculate floor position within current level (1-25)
+  let floorPosition = (depth % 25) + 1;
+  text("FLOOR: " + floorPosition + "/25", 10, 35);
   fill(200, 150, 255);
   text("LEVEL: " + currentLevel, 10, 50);
   if (blob.excitedTimer > 0) {
