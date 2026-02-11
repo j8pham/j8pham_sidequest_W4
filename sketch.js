@@ -66,8 +66,9 @@ function setup() {
 }
 
 function loadLevel() {
-  // Get current level data from JSON
-  levelConfig = levelsData.levels[currentLevel - 1];
+  // Get current level data from JSON, clamping to last level if out of bounds
+  let levelIndex = min(currentLevel - 1, levelsData.levels.length - 1);
+  levelConfig = levelsData.levels[levelIndex];
 
   // Reset game state
   platforms = [];
@@ -516,9 +517,11 @@ function draw() {
   textSize(12);
   text("SCORE: " + score, 10, 20);
   text("FLOOR: " + floor, 10, 35);
+  fill(200, 150, 255);
+  text("LEVEL: " + currentLevel, 10, 50);
   if (blob.excitedTimer > 0) {
     fill(255, 255, 50);
-    text("^ JUMP! ^", 10, 50);
+    text("^ JUMP! ^", 10, 65);
   }
 
   // Mischief mode HUD
@@ -540,16 +543,38 @@ function draw() {
     textAlign(LEFT);
   }
 
-  // Level transition message
+  // Level transition banner with fade
   if (levelTransitionTimer > 0) {
-    levelTransitionTimer--;
-    fill(255, 200, 0);
+    // Calculate fade opacity (full at start, fades as timer counts down)
+    let fadeOpacity = map(levelTransitionTimer, 0, 180, 0, 255);
+
+    // Draw semi-transparent background banner
+    fill(0, 0, 0, fadeOpacity * 0.6);
+    rect(width / 2 - 200, height / 2 - 80, 400, 160);
+
+    // Draw border
+    stroke(255, 200, 0, fadeOpacity);
+    strokeWeight(3);
+    noFill();
+    rect(width / 2 - 200, height / 2 - 80, 400, 160);
+    noStroke();
+
+    // Draw level number and name
+    fill(255, 200, 0, fadeOpacity);
     textAlign(CENTER, CENTER);
-    textSize(24);
-    text("LEVEL 2: " + levelConfig.name, width / 2, height / 2 - 30);
-    fill(200, 200, 200);
+    textSize(48);
+    text("LEVEL " + currentLevel, width / 2, height / 2 - 30);
+
+    fill(200, 200, 200, fadeOpacity);
+    textSize(20);
+    text(levelConfig.name, width / 2, height / 2 + 20);
+
+    // Draw progression text
+    fill(150, 255, 150, fadeOpacity);
     textSize(14);
-    text("Things are getting harder...", width / 2, height / 2 + 20);
+    text("Floor " + floor, width / 2, height / 2 + 50);
+
+    levelTransitionTimer--;
   }
 }
 
