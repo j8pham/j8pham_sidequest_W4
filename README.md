@@ -1,6 +1,6 @@
 ## Project Title
 
-GBDA302 Week 3: A Stranger in Town
+GBDA302 Week 2: Environment and Emotion
 
 ---
 
@@ -13,29 +13,26 @@ Previously by Karen Cochrane and David Han
 
 ## Description
 
-A Stranger in Town is an interactive story game where you wake up in a weird town with no memory of who you are. You make choices at different spots like the diner, police station, and sketchy back alleys to figure out your past.
-
-The game tracks three stats: Memory (figuring out who you are), Trust (if people believe you), and Suspicion (if the cops are onto you).
-
-Your choices matter across about 20 scenes and lead to 4 different endings: Redemption, Justice, Expose, or Dark Path. You also collect items like a locker key, journal, and evidence that unlock certain story paths.
+Dungeon Drop is a vertical dungeon arcade game where the player controls a blob that continuously drops downward through increasingly dangerous levels. The player must avoid spikes and monsters while collecting blob fragments to gain points. A rare mischievous blob can also appear, granting temporary immunity.
 
 ## Setup and Interaction Instructions
 
 ### Setup
 
-- Run in web browser
+- Run in web browser (github pages link)
 
 ### Controls
 
-- **Mouse Click**: Pick dialogue choices
-- **Space Bar**: Continue text / Start game
+- **A / D or Left / Right Arrow Keys**: Move left and right
+- **Space Bar or W**: Jump
+- **R**: Restart
 
 ### Objective
 
-- Make choices that affect how your story plays out
-- Keep track of Memory, Trust, and Suspicion stats
-- Collect items to unlock new story branches
-- Get one of 4 endings based on your decisions
+- Avoid spikes and monsters.
+- Collect blob pieces to increase score.
+- Collect the mischievous blob to gain temporary immunity.
+- Survive as long as possible as speed and difficulty increase.
 
 ---
 
@@ -43,24 +40,18 @@ Your choices matter across about 20 scenes and lead to 4 different endings: Rede
 
 ### Post-Playtest: Changes Made
 
-1. Fixed bugs where scenes weren't connecting properly.
-2. Cleaned up text alignment and button spacing.
-3. Made the start screen actually reset the game state.
+1. Adjusted movement speed to improve early-game control.
+2. Rebalanced spike and monster placement to reduce unfair deaths.
+3. Improved visual feedback when immunity is active.
 
 ### Post-Showcase: Planned Improvements
 
-1. Add stat bars so you can see your Memory/Trust/Suspicion levels.
-2. Make a journal feature to review past choices.
+1. Add additional enemy variations to increase late-game variety.
+2. Introduce audio feedback to reinforce tension and speed changes.
 
 ---
 
 ## Assets
-
-N/A
-
----
-
-## References
 
 N/A
 
