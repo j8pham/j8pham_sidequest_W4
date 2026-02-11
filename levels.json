@@ -1,0 +1,40 @@
+{
+  "levels": [
+    {
+      "id": 1,
+      "name": "Level 1: Gentle Descent",
+      "platformDensity": 0.6,
+      "spikeSpawnRate": 0.15,
+      "monsterSpawnRate": 0.12,
+      "collectibleSpawnRate": 0.25,
+      "platformSpeed": 2,
+      "blobMovementSpeed": 3,
+      "colorTheme": {
+        "background": "#87CEEB",
+        "platforms": "#2E8B57",
+        "spikes": "#FF6B6B",
+        "monsters": "#FFB6C1",
+        "collectibles": "#FFD700",
+        "blob": "#4169E1"
+      }
+    },
+    {
+      "id": 2,
+      "name": "Level 2: Chaos Chaos",
+      "platformDensity": 0.4,
+      "spikeSpawnRate": 0.35,
+      "monsterSpawnRate": 0.28,
+      "collectibleSpawnRate": 0.12,
+      "platformSpeed": 4,
+      "blobMovementSpeed": 5,
+      "colorTheme": {
+        "background": "#2C3E50",
+        "platforms": "#E74C3C",
+        "spikes": "#8B0000",
+        "monsters": "#9B59B6",
+        "collectibles": "#F39C12",
+        "blob": "#E8DAEF"
+      }
+    }
+  ]
+}
